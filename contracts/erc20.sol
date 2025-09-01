@@ -2,11 +2,11 @@
 pragma solidity ^0.8.28;
 
 contract erc20 {
-    string public name;
-    string public symbol;
-    uint8 public immutable decimals;
-    mapping(address => uint) public balanceOf;
-    mapping(address => mapping(address => uint)) public allowance;
+    string private name;
+    string private symbol;
+    uint8 private immutable decimals;
+    mapping(address => uint) private balanceOf;
+    mapping(address => mapping(address => uint)) private allowance;
     uint private totalSupply;
     constructor(string memory _name, string memory _symbol, uint8 _decimals) {
         name = _name;
