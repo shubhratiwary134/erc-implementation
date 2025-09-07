@@ -6,7 +6,7 @@ contract erc20 {
     string private symbol;
     uint8 private immutable decimals;
     mapping(address => uint) private balances;
-    mapping(address => mapping(address => uint)) private _allowance;
+    mapping(address => mapping(address => uint)) private _allowances;
     uint private _totalSupply;
 
     event Transfer(address indexed from, address indexed to, uint value);
@@ -43,7 +43,7 @@ contract erc20 {
         address owner,
         address spender
     ) external view returns (uint) {
-        return _allowance[owner][spender];
+        return _allowances[owner][spender];
     }
 
     /* transfer function to transfer tokens from one account to another with 
@@ -65,12 +65,12 @@ contract erc20 {
         return true;
     }
 
-    function approve(address spender, uint amount) external returns (bool) {
+    function approve(address spender, uint amount) public returns (bool) {
         require(
             spender != address(0),
             "Approve to the zero address is not allowed"
         );
-        _allowance[msg.sender][spender] = amount;
+        _allowances[msg.sender][spender] = amount;
         emit Approve(msg.sender, spender, amount);
         return true;
     }
@@ -81,11 +81,11 @@ contract erc20 {
         uint amount
     ) external returns (bool) {
         require(
-            _allowance[from][msg.sender] >= amount,
+            _allowances[from][msg.sender] >= amount,
             "Not Authorized for that much amount"
         );
         _transfer(from, to, amount);
-        _allowance[from][msg.sender] -= amount;
+        _allowances[from][msg.sender] -= amount;
         return true;
     }
 
@@ -108,5 +108,18 @@ contract erc20 {
         balances[from] -= amount;
         _totalSupply -= amount;
         emit Transfer(from, address(0), amount);
+    }
+
+    function increaseAllowance(address spender, uint amount) external {
+        uint addedAmount = _allowances[msg.sender][spender] + amount;
+        approve(spender, addedAmount);
+    }
+    function decreaseAllowance(address spender, uint amount) external {
+        require(
+            _allowances[msg.sender][spender] >= amount,
+            "Cannot decrease allowance to less than 0"
+        );
+        uint subtractedAmount = _allowances[msg.sender][spender] - amount;
+        approve(spender, subtractedAmount);
     }
 }
