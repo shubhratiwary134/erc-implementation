@@ -55,9 +55,15 @@ contract erc20 {
             to != address(0),
             "Transfer to the zero address is not allowed"
         );
+        require(
+            from != address(0),
+            "Transfer from zero address is not allowed"
+        );
+        _beforeTokenTransfer(from, to, amount);
         balances[from] -= amount;
         balances[to] += amount;
         emit Transfer(from, to, amount);
+        _afterTokenTransfer(from, to, amount);
     }
 
     function transfer(address to, uint amount) external returns (bool) {
@@ -91,9 +97,11 @@ contract erc20 {
 
     function _mint(address to, uint amount) internal {
         require(to != address(0), "minting to address 0 not allowed");
+        _beforeTokenTransfer(address(0), to, amount);
         _totalSupply += amount;
         balances[to] += amount;
         emit Transfer(address(0), to, amount);
+        _afterTokenTransfer(address(0), to, amount);
     }
 
     function _burn(address from, uint amount) internal {
@@ -105,9 +113,11 @@ contract erc20 {
             balances[from] >= amount,
             "Cant burn more than the amount itself"
         );
+        _beforeTokenTransfer(from, address(0), amount);
         balances[from] -= amount;
         _totalSupply -= amount;
         emit Transfer(from, address(0), amount);
+        _afterTokenTransfer(from, address(0), amount);
     }
 
     function increaseAllowance(address spender, uint amount) external {
@@ -122,4 +132,16 @@ contract erc20 {
         uint subtractedAmount = _allowances[msg.sender][spender] - amount;
         approve(spender, subtractedAmount);
     }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint amount
+    ) internal virtual {}
+
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint amount
+    ) internal virtual {}
 }
